@@ -61,15 +61,19 @@ export const LoginForm = ({onSubmit, buttonText}) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <label>
-        <input value={formData.username} type='text' name={'username'}
+      <div>
+        <label htmlFor={'username'}>Username:</label>
+        <input id={'username'} value={formData.username} type='text' name={'username'}
                onChange={onUsernameChange} />
-      </label>
-      <label>
+      </div>
+      <div>
+        <label htmlFor={'password'}>Password:</label>
         <input value={formData.password} type='password' name={'username'}
                onChange={onPasswordChange} />
-      </label>
-      <button>{buttonText}</button>
+      </div>
+      <div>
+        <button>{buttonText}</button>
+      </div>
     </form>
   )
 }

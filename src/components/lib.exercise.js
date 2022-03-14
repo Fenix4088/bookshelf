@@ -1,5 +1,7 @@
 import styled from '@emotion/styled/macro'
 import {Dialog as ReachDialog} from '@reach/dialog'
+import {indigo, gray, base, text} from '../styles/colors';
+import {small} from '../styles/media-queries';
 
 export const Button = styled.button(
     {
@@ -9,29 +11,10 @@ export const Button = styled.button(
         borderRadius: '3px',
     },
     props => ({
-      background: props.variant === 'primary' ? '#3f51b5' : '#f1f2f7',
-      color: props.variant === 'primary' ? 'white' : '#434449',
+      background: props.variant === 'primary' ? indigo : gray,
+      color: props.variant === 'primary' ? base : text,
     })
 );
-
-// 🐨 Feel free to create as many reusable styled components here as you'd like
-// 💰 in my finished version I have: Button, Input, CircleButton, Dialog, FormGroup
-
-// 🎨 here are a bunch of styles you can copy/paste if you want
-// Button:
-//   padding: '10px 15px',
-//   border: '0',
-//   lineHeight: '1',
-//   borderRadius: '3px',
-
-// Button variant="primary" (in addition to the above styles)
-//   background: '#3f51b5',
-//   color: 'white',
-
-// Button variant="secondary" (in addition to the above styles)
-//   background: '#f1f2f7',
-//   color: '#434449',
-
 
 export const Input = styled.input
     ({
@@ -69,7 +52,7 @@ const Dialog = styled(ReachDialog)({
     paddingBottom: '3.5em',
     boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.2)',
     margin: '20vh auto',
-    '@media (max-width: 991px)': {
+    [small]: {
         width: '100%',
         margin: '10vh auto',
     },

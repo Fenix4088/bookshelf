@@ -5,7 +5,12 @@ function client(endpoint, customConfig = {}) {
         ...customConfig
     }
 
-    return fetch(`${process.env.REACT_APP_API_URL}/${endpoint}`, config).then(res => res.json())
+    return fetch(`${process.env.REACT_APP_API_URL}/${endpoint}`, config).then(async res => {
+        const data = await res.json();
+        if(!res.ok) return Promise.reject(data);
+
+        return data
+    })
 }
 
 export {client}

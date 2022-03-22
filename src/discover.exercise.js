@@ -8,38 +8,24 @@ import {FaSearch, FaTimes} from 'react-icons/fa'
 import {Input, BookListUL, Spinner} from './components/lib'
 import {BookRow} from './components/book-row'
 import {client} from './utils/api-client'
+import {useAsync} from 'utils/hooks'
 import * as colors from "./styles/colors";
 
 function DiscoverBooksScreen() {
-    const [{status, data, query, error}, setQueryState] = React.useState({
-        status: 'idle', // 'idle', 'loading', 'success', 'error'
-        data: null,
-        query: '',
-        error: null
-    });
 
+    const {data, error, run, isLoading, isError, isSuccess} = useAsync()
     const [queried, setQueried] = React.useState(false);
-
-    const isLoading = status === 'loading';
-    const isSuccess = status === 'success';
-    const isError = status === 'error';
+    const [query, setQuery] = React.useState('');
 
     React.useEffect(() => {
         if (!queried) return;
-
-        setQueryState(s => ({...s, status: 'loading'}));
-
-        client(`books?query=${encodeURIComponent(query)}`).then(data => {
-            setQueryState(s => ({...s, status: 'success', data}));
-        }).catch(error => {
-            setQueryState(s => ({...s, status: 'error', error}));
-        })
+        run(client(`books?query=${encodeURIComponent(query)}`))
     }, [query, queried])
 
     function handleSearchSubmit(event) {
         event.preventDefault();
         setQueried(true);
-        setQueryState(s => ({...s, query: event.target.elements.search.value}));
+        setQuery(event.target.elements.search.value)
     }
 
     return (

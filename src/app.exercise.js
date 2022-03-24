@@ -2,16 +2,33 @@
 import {jsx} from '@emotion/core'
 
 import * as React from 'react'
-// 🐨 you're going to need this:
 import * as auth from 'auth-provider'
 import {AuthenticatedApp} from './authenticated-app'
 import {UnauthenticatedApp} from './unauthenticated-app'
+import {client} from "./utils/api-client.exercise";
+
+export const getUser = async () => {
+    let user = null;
+    const token = await auth.getToken()
+
+    if(token) {
+        const data = await client('me', {token})
+        user = data.user;
+    }
+
+    return user
+
+}
 
 function App() {
     const [user, setUser] = React.useState(null);
 
-    const login = ({username, password}) => auth.login({username, password}).then(user => setUser(user));
-    const registration = ({username, password}) => auth.register({username, password}).then(user => setUser(user));
+    React.useEffect(() => {
+        getUser().then(setUser);
+    }, [])
+
+    const login = ({username, password}) => auth.login({username, password}).then(setUser);
+    const registration = ({username, password}) => auth.register({username, password}).then(setUser);
     const logout = () => {
         auth.logout().then(() => setUser(null))
     }

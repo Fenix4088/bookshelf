@@ -41,8 +41,7 @@ function App() {
     const login = form => auth.login(form).then(user => setData(user))
     const register = form => auth.register(form).then(user => setData(user))
     const logout = () => {
-        auth.logout()
-        setData(null)
+        auth.logout().then(() => setData(null))
     }
 
     if (isLoading || isIdle) {

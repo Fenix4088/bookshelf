@@ -9,9 +9,11 @@ import * as colors from './styles/colors'
 import {BookScreen} from './screens/book.exercise';
 import {NotFoundScreen} from './screens/not-found.exercise';
 import {DiscoverBooksScreen} from './screens/discover';
+import {useMatch} from "react-router";
 
 
 function AuthenticatedApp({user, logout}) {
+
     return (
         <React.Fragment>
             <div
@@ -56,9 +58,11 @@ function AuthenticatedApp({user, logout}) {
 }
 
 function NavLink(props) {
+    const matches = useMatch(props.to);
+
     return (
         <Link
-            css={{
+            css={[{
                 display: 'block',
                 padding: '8px 15px 8px 10px',
                 margin: '5px 0',
@@ -72,7 +76,13 @@ function NavLink(props) {
                     textDecoration: 'none',
                     background: colors.gray10,
                 },
-            }}
+            }, matches ? {
+                borderLeft: `5px solid ${colors.indigo}`,
+                background: colors.gray10,
+                ':hover': {
+                    background: colors.gray20,
+                },
+            } : null]}
             {...props}
         />
     )
@@ -108,13 +118,6 @@ function Nav() {
 }
 
 function AppRoutes({user}) {
-    // 🐨 Return all the routes here.
-    // 💰 Here's the mapping of URL to element:
-    //     /discover         <DiscoverBooksScreen user={user} />
-    //     /book/:bookId     <BookScreen user={user} />
-    //     *                 <NotFoundScreen />
-    //
-    // Make sure to check the INSTRUCTIONS.md for how this should be structured
     return <Routes>
         <Route path={'/discover'} element={<DiscoverBooksScreen user={user}/>}/>
         <Route path={'/book/:bookId'} element={<BookScreen user={user}/>}/>

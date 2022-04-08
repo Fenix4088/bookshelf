@@ -16,23 +16,14 @@ import {Textarea} from 'components/lib'
 import {Rating} from 'components/rating'
 import {StatusButtons} from 'components/status-buttons'
 import bookPlaceholderSvg from 'assets/book-placeholder.svg'
+import {useBook} from '../utils/books.exercise'
 
-const loadingBook = {
-  title: 'Loading...',
-  author: 'loading...',
-  coverImageUrl: bookPlaceholderSvg,
-  publisher: 'Loading Publishing',
-  synopsis: 'Loading...',
-  loadingBook: true,
-}
+
 
 function BookScreen({user}) {
   const {bookId} = useParams()
 
-  const {data} = useQuery({
-    queryKey: ['book', {bookId}],
-    queryFn: () => client(`books/${bookId}`, {token: user.token}),
-  })
+  const book = useBook(bookId, user)
 
   const {data: listItems} = useQuery({
     queryKey: 'list-items',
@@ -46,7 +37,6 @@ function BookScreen({user}) {
   // and instead expects us to cache all the list items and look them up in our
   // cache. This works out because we're using react-query for caching!
 
-  const book = data?.book ?? loadingBook
   const {title, author, coverImageUrl, publisher, synopsis} = book
 
   return (

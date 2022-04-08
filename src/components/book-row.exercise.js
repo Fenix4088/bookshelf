@@ -1,15 +1,16 @@
 /** @jsx jsx */
 import {jsx} from '@emotion/core'
-
 import {Link} from 'react-router-dom'
 import {useQuery} from 'react-query';
 import {client} from 'utils/api-client';
 import * as colors from 'styles/colors'
 import {StatusButtons} from './status-buttons'
 import {Rating} from './rating'
+import {DefaultAllowlist as mq} from "bootstrap/js/src/util/sanitizer";
 
 function BookRow({user, book}) {
     const {title, author, coverImageUrl} = book
+
     const {data: listItems} = useQuery({
         queryKey: 'list-items',
         queryFn: () =>
@@ -17,7 +18,6 @@ function BookRow({user, book}) {
     });
 
     const listItem = listItems?.find(({bookId}) => bookId === book.id) ?? null;
-
 
     const id = `book-row-book-${book.id}`
 

@@ -4,7 +4,7 @@ import './bootstrap'
 import * as React from 'react'
 import ReactDOM from 'react-dom'
 import {ReactQueryConfigProvider} from 'react-query'
-import {App} from './app'
+import {App} from './app.exercise'
 
 const queryConfig = {
   retry(failureCount, error) {

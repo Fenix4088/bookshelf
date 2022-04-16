@@ -13,6 +13,17 @@ export const useAuth = () => {
   return ctx
 }
 
+export const useClient = () => {
+  const {
+    user: {token},
+  } = useAuth()
+
+  return React.useCallback(
+    (endpoint, config = {}) => client(endpoint, {...config, token}),
+    [token],
+  )
+}
+
 async function getUser() {
   let user = null
 
@@ -63,5 +74,4 @@ export const AuthProvider = ({children}) => {
       </AuthContext.Provider>
     )
   }
-
 }

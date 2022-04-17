@@ -1,6 +1,10 @@
 import React from 'react'
 import {Dialog} from './lib'
-import button from 'bootstrap/js/src/button'
+
+export const callAll =
+  (...fns) =>
+  (...args) =>
+    fns.forEach(fn => fn && fn(...args))
 
 export const ModalContext = React.createContext(null)
 
@@ -14,7 +18,7 @@ export const ModalDismissButton = ({children: child}) => {
   const [, setIsOpen] = React.useContext(ModalContext)
 
   return React.cloneElement(child, {
-    onClick: () => setIsOpen(false),
+    onClick: callAll(() => setIsOpen(false), child.props.onClick),
   })
 }
 
@@ -22,17 +26,14 @@ export const ModalOpenButton = ({children: child}) => {
   const [, setIsOpen] = React.useContext(ModalContext)
 
   return React.cloneElement(child, {
-    onClick: () => setIsOpen(true),
+    onClick: callAll(() => setIsOpen(true), child.props.onClick),
   })
 }
 
-export const ModalContents = ({props, children}) => {
+export const ModalContents = props => {
   const [isOpen, setIsOpen] = React.useContext(ModalContext)
 
   return (
-    <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props}>
-      {children}
-    </Dialog>
+    <Dialog isOpen={isOpen} onDismiss={() => setIsOpen(false)} {...props} />
   )
 }
-

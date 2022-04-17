@@ -108,7 +108,7 @@ function UnauthenticatedApp() {
       >
         <Modal>
           <ModalOpenButton>
-            <Button variant="primary">Login</Button>
+            <Button variant="primary" onClick={() => console.log('Fire some action...')}>Login</Button>
           </ModalOpenButton>
           <ModalContents aria-label="Login form">
             {circleDismissButton}
@@ -124,7 +124,7 @@ function UnauthenticatedApp() {
           <ModalOpenButton>
             <Button variant="secondary">Register</Button>
           </ModalOpenButton>
-          <ModalContents>
+          <ModalContents aria-label="Register form">
             {circleDismissButton}
             <h3 css={{textAlign: 'center', fontSize: '2em'}}>Register</h3>
             <LoginForm

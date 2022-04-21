@@ -2,8 +2,8 @@ import * as React from 'react'
 import {useAuth} from './context/auth-context'
 import {FullPageSpinner} from './components/lib'
 
-const AuthenticatedApp = React.lazy(() => import('./authenticated-app'))
-const UnauthenticatedApp = React.lazy(() => import('./unauthenticated-app'))
+const AuthenticatedApp = React.lazy(() => import(/* webpackPrefetch: true */ /* webpackChunkName: "authenticated-app" */'./authenticated-app'))
+const UnauthenticatedApp = React.lazy(() => import(/* webpackPrefetch: true */ /* webpackChunkName: "unauthenticated-app" */'./unauthenticated-app'))
 
 function App() {
   const {user} = useAuth()

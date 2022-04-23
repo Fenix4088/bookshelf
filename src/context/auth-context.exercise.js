@@ -6,14 +6,23 @@ import * as auth from 'auth-provider'
 import {client} from 'utils/api-client'
 import {useAsync} from 'utils/hooks'
 import {FullPageSpinner, FullPageErrorFallback} from 'components/lib'
+import {queryCache} from 'react-query'
+import {setQueryDataForBook} from '../utils/books'
 
-async function getUser() {
+async function bootstrapAppData() {
   let user = null
 
   const token = await auth.getToken()
   if (token) {
-    const data = await client('me', {token})
-    user = data.user
+    const {user: userData, listItems} = await client('bootstrap', {token})
+    queryCache.setQueryData('list-items', listItems, {
+      staleTime: 5000,
+    })
+
+    for (const listItem of listItems) {
+      setQueryDataForBook(listItem.book)
+    }
+    user = userData
   }
 
   return user
@@ -22,8 +31,7 @@ async function getUser() {
 const AuthContext = React.createContext()
 AuthContext.displayName = 'AuthContext'
 
-const userPromise = getUser()
-
+const appDataPromise = bootstrapAppData()
 
 function AuthProvider(props) {
   const {
@@ -47,7 +55,7 @@ function AuthProvider(props) {
     // the request.
     // We're moving from "Fetch on render" to "Render WHILE you fetch"!
     // const userPromise = getUser()
-    run(userPromise)
+    run(appDataPromise)
   }, [run])
 
   const login = React.useCallback(
@@ -63,12 +71,10 @@ function AuthProvider(props) {
     setData(null)
   }, [setData])
 
-  const value = React.useMemo(() => ({user, login, logout, register}), [
-    login,
-    logout,
-    register,
-    user,
-  ])
+  const value = React.useMemo(
+    () => ({user, login, logout, register}),
+    [login, logout, register, user],
+  )
 
   if (isLoading || isIdle) {
     return <FullPageSpinner />

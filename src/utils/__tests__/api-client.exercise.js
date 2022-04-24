@@ -1,13 +1,17 @@
-// 🐨 you'll need the test server
-// 💰 the way that our tests are set up, you'll find this in `src/test/server/test-server.js`
-// import {server, rest} from 'test/server'
-// 🐨 grab the client
-// import {client} from '../api-client'
+import {server, rest} from 'test/server'
+import {client} from '../api-client'
 
-// 🐨 add a beforeAll to start the server with `server.listen()`
-// 🐨 add an afterAll to stop the server when `server.close()`
-// 🐨 afterEach test, reset the server handlers to their original handlers
-// via `server.resetHandlers()`
+beforeAll(() => {
+  server.listen()
+})
+
+afterAll(() => {
+  server.close()
+})
+
+afterEach(() => {
+  server.resetHandlers()
+})
 
 // 🐨 flesh these out:
 

@@ -1,6 +1,11 @@
 import {server, rest} from 'test/server'
 import {client} from '../api-client'
-import {response} from "msw";
+import {response} from 'msw'
+import {queryCache} from "react-query";
+import * as auth from "../../auth-provider";
+
+jest.mock('react-query');
+jest.mock('../../auth-provider');
 
 const apiURL = process.env.REACT_APP_API_URL
 
@@ -76,9 +81,9 @@ test('allows for config overrides', async () => {
 test('when data is provided, it is stringified and the method defaults to POST', async () => {
   const endpoint = 'test-endpoint'
   server.use(
-      rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
-        return res(ctx.json(req.body))
-      }),
+    rest.post(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+      return res(ctx.json(req.body))
+    }),
   )
   const data = {a: 'b'}
   const result = await client(endpoint, {data})
@@ -86,3 +91,31 @@ test('when data is provided, it is stringified and the method defaults to POST',
   expect(result).toEqual(data)
 })
 
+test('promise rejected id some error occurred on server', async () => {
+  const endpoint = 'test-endpoint';
+  const testError = {message: 'Oops 404!'}
+
+  server.use(rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+    return res(ctx.status(404), ctx.json(testError))
+  }));
+
+  await expect(client(endpoint)).rejects.toEqual(testError)
+
+})
+
+test('automatically logs the user out if a request returns a 401', async () => {
+  const endpoint = 'test-endpoint'
+  const mockResult = {mockValue: 'VALUE'}
+  server.use(
+      rest.get(`${apiURL}/${endpoint}`, async (req, res, ctx) => {
+        return res(ctx.status(401), ctx.json(mockResult))
+      }),
+  )
+
+  const error = await client(endpoint).catch(e => e)
+
+  expect(error.message).toMatchInlineSnapshot(`"Please re-authenticate."`)
+
+  expect(queryCache.clear).toHaveBeenCalledTimes(1)
+  expect(auth.logout).toHaveBeenCalledTimes(1)
+})

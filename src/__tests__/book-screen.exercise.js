@@ -9,6 +9,8 @@ import {localStorageKey} from 'auth-provider'
 import * as usersDB from 'test/data/users'
 import * as booksDB from 'test/data/books'
 import * as listItemsDB from 'test/data/list-items'
+import userEvent from '@testing-library/user-event'
+import {formatDate} from "../utils/misc";
 
 // 🐨 after each test, clear the queryCache and auth.logout
 afterEach(async () => {
@@ -32,32 +34,12 @@ test('renders all the book information', async () => {
   const route = `/book/${book.id}`
   window.history.pushState({}, 'Test page', route)
 
-  // const originalFetch = window.fetch
-  // window.fetch = async (url, config) => {
-  //   console.log(url)
-  //   if (url.endsWith('/bootstrap')) {
-  //     return {
-  //       ok: true,
-  //       json: async () => ({
-  //         user: {...user, token: 'SOME_FAKE_TOKEN'},
-  //         listItems: [],
-  //       }),
-  //     }
-  //   } else if (url.endsWith(`/books/${book.id}`)) {
-  //     return {ok: true, json: async () => ({book})}
-  //   }
-  //   return originalFetch(url, config)
-  // }
-
   const {debug} = render(<App />, {wrapper: AppProviders})
 
   await waitForElementToBeRemoved(() => [
     ...screen.queryAllByLabelText(/loading/i),
     ...screen.queryAllByText(/loading/i),
   ])
-
-  // debug();
-  // screen.debug();
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -83,4 +65,65 @@ test('renders all the book information', async () => {
   ).not.toBeInTheDocument()
   expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
   expect(screen.queryByLabelText(/start date/i)).not.toBeInTheDocument()
+})
+
+test('can create a list item for the book', async () => {
+  const user = buildUser()
+  await usersDB.create(user)
+  const authUser = await usersDB.authenticate(user)
+  localStorage.setItem(localStorageKey, authUser.token)
+
+  const book = await booksDB.create(buildBook())
+
+  const route = `/book/${book.id}`
+  window.history.pushState({}, 'Test page', route)
+
+  const {debug} = render(<App />, {wrapper: AppProviders})
+
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
+
+  const addToListBtn = screen.queryByRole('button', {
+    name: /add to list/i,
+  })
+
+  userEvent.click(addToListBtn)
+
+  expect(addToListBtn).toBeDisabled()
+
+  await waitForElementToBeRemoved(() => [
+    ...screen.queryAllByLabelText(/loading/i),
+    ...screen.queryAllByText(/loading/i),
+  ])
+
+  expect(
+    screen.queryByRole('button', {
+      name: /add to list/i,
+    }),
+  ).not.toBeInTheDocument()
+
+  expect(
+    screen.getByRole('button', {
+      name: /mark as read/i,
+    }),
+  ).toBeInTheDocument()
+
+  expect(
+    screen.getByRole('button', {
+      name: /remove from list/i,
+    }),
+  ).toBeInTheDocument()
+  expect(
+    screen.getByRole('textbox', {
+      name: /notes/i,
+    }),
+  ).toBeInTheDocument()
+
+  const startDateNode = screen.getByLabelText(/start date/i)
+
+  expect(startDateNode).toBeInTheDocument();
+  expect(startDateNode).toHaveTextContent(formatDate(Date.now()));
+  expect(screen.queryByRole('radio', {name: /star/i})).not.toBeInTheDocument()
 })

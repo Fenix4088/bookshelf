@@ -17,11 +17,30 @@ afterEach(() => {
   jest.useRealTimers()
 })
 
-test('renders all the book information', async () => {
-  const book = await booksDB.create(buildBook())
+async function renderBookScreen({user, book, listItem} = {}) {
+  if (user === undefined) {
+    user = await loginAsUser()
+  }
+  if (book === undefined) {
+    book = await booksDB.create(buildBook())
+  }
+  if (listItem === undefined) {
+    listItem = await listItemsDB.create(buildListItem({owner: user, book}))
+  }
   const route = `/book/${book.id}`
 
-  await render(<App />, {route})
+  const utils = await render(<App />, {user, route})
+
+  return {
+    ...utils,
+    book,
+    user,
+    listItem,
+  }
+}
+
+test('renders all the book information', async () => {
+  const {book} = await renderBookScreen({listItem: null})
 
   expect(screen.getByRole('heading', {name: book.title})).toBeInTheDocument()
   expect(screen.getByText(book.author)).toBeInTheDocument()
@@ -50,10 +69,7 @@ test('renders all the book information', async () => {
 })
 
 test('can create a list item for the book', async () => {
-  const book = await booksDB.create(buildBook())
-  const route = `/book/${book.id}`
-
-  await render(<App />, {route})
+  await renderBookScreen({listItem: null})
 
   const addToListButton = screen.getByRole('button', {name: /add to list/i})
   userEvent.click(addToListButton)
@@ -82,11 +98,7 @@ test('can create a list item for the book', async () => {
 })
 
 test('can remove a list item for the book', async () => {
-  const user = await loginAsUser()
-  const book = await booksDB.create(buildBook())
-  await listItemsDB.create(buildListItem({owner: user, book}))
-
-  await render(<App />, {route: `/book/${book.id}`, user})
+  await renderBookScreen()
 
   const removeFromListItemBtn = screen.getByRole('button', {
     name: /remove from list/i,
@@ -110,11 +122,11 @@ test('can remove a list item for the book', async () => {
 })
 
 test('can mark a list item as read', async () => {
-  const user = await loginAsUser()
-  const book = await booksDB.create(buildBook())
-  const listItem = await listItemsDB.create(buildListItem({owner: user, book}))
+  const {listItem} = await renderBookScreen()
 
-  await render(<App />, {route: `/book/${book.id}`, user})
+  // set the listItem to be unread in the DB
+  await listItemsDB.update(listItem.id, {finishDate: null})
+
 
   const markAsReadBtn = screen.getByRole('button', {
     name: /mark as read/i,
@@ -144,12 +156,7 @@ test('can mark a list item as read', async () => {
 test('can edit note', async () => {
   // using fake timers to skip debounce time
   jest.useFakeTimers()
-  const user = await loginAsUser()
-  const book = await booksDB.create(buildBook())
-  const listItem = await listItemsDB.create(buildListItem({owner: user, book}))
-  const route = `/book/${book.id}`
-
-  await render(<App />, {route, user})
+  const {listItem} = await renderBookScreen()
 
   const newNotes = faker.lorem.words()
   const notesTextarea = screen.getByRole('textbox', {name: /notes/i})
